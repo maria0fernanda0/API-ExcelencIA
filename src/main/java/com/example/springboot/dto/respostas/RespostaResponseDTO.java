@@ -1,14 +1,21 @@
 package com.example.springboot.dto.respostas;
 
-public class RespostaRequestDTO {
+public class RespostaResponseDTO {
 
+    private Integer id;
     private Integer simulacaoId;
     private Integer perguntaId;
-    private String urlAudio;
-    private String urlVideo;
     private String transcricao;
 
-    public RespostaRequestDTO() {
+    public RespostaResponseDTO() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Integer getSimulacaoId() {
@@ -25,22 +32,6 @@ public class RespostaRequestDTO {
 
     public void setPerguntaId(Integer perguntaId) {
         this.perguntaId = perguntaId;
-    }
-
-    public String getUrlAudio() {
-        return urlAudio;
-    }
-
-    public void setUrlAudio(String urlAudio) {
-        this.urlAudio = urlAudio;
-    }
-
-    public String getUrlVideo() {
-        return urlVideo;
-    }
-
-    public void setUrlVideo(String urlVideo) {
-        this.urlVideo = urlVideo;
     }
 
     public String getTranscricao() {

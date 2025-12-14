@@ -77,4 +77,5 @@ public class GeminiServices {
         return enviarPrompt(comando);
     }
 
+
 }

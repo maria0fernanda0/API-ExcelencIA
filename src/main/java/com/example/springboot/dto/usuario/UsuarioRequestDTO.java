@@ -6,4 +6,39 @@ public class UsuarioRequestDTO {
     private String email;
     private String senhaHash;
     private Integer planoId;
+
+    public UsuarioRequestDTO() {
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getSenhaHash() {
+        return senhaHash;
+    }
+
+    public void setSenhaHash(String senhaHash) {
+        this.senhaHash = senhaHash;
+    }
+
+    public Integer getPlanoId() {
+        return planoId;
+    }
+
+    public void setPlanoId(Integer planoId) {
+        this.planoId = planoId;
+    }
 }

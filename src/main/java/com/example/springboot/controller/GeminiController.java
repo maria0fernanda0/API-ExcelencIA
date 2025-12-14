@@ -2,19 +2,34 @@ package com.example.springboot.controller;
 
 
 import com.example.springboot.dto.SessaoCompletaDTO;
+import com.example.springboot.dto.pergunta.PerguntaDTO;
 import com.example.springboot.dto.respostas.RespostaDTO;
 import com.example.springboot.dto.simulacao.ParametrosSimulacaoDTO;
 import com.example.springboot.services.GeminiServices;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @RestController
-@RequestMapping("/gem")
-@RequiredArgsConstructor
+@RequestMapping(value ="/gem",
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
+
 
 public class GeminiController {
 
     private final GeminiServices geminiService;
+
+    public GeminiController(GeminiServices geminiService) {
+        this.geminiService = geminiService;
+    }
+
+
+
 
     // 1. Teste simples
     @PostMapping("/ask")
@@ -29,9 +44,11 @@ public class GeminiController {
     }
 
     // 3. Gerar nova pergunta
-    @PostMapping("/pergunta")
-    public String gerarPergunta(@RequestParam ParametrosSimulacaoDTO dto) {
-        return geminiService.gerarPergunta(dto);
+    @PostMapping(
+            value = "/pergunta"
+    )
+    public ResponseEntity<String> perguntar(@RequestBody PerguntaDTO dto) {
+        return ResponseEntity.ok("Pergunta recebida: " + dto.getPergunta());
     }
 
     // 4. Gerar relatório
@@ -39,4 +56,7 @@ public class GeminiController {
     public String gerarRelatorio(@RequestBody SessaoCompletaDTO dto) {
         return geminiService.gerarRelatorio(dto);
     }
+
+
+
 }
