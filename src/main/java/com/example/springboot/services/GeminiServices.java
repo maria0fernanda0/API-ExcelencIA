@@ -1,49 +1,68 @@
 package com.example.springboot.services;
 
-
+import com.example.springboot.model.Content;
+import com.example.springboot.model.Part;
 import com.example.springboot.dto.SessaoCompletaDTO;
 import com.example.springboot.dto.respostas.RespostaDTO;
-import com.example.springboot.dto.respostas.RespostaRequestDTO;
 import com.example.springboot.dto.simulacao.ParametrosSimulacaoDTO;
+import com.example.springboot.dto.GeminiRequest;
+import com.example.springboot.model.GeminiResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
+import org.springframework.beans.factory.annotation.Value;
+
+import java.util.List;
+import java.util.Map;
+
 
 @Service
-@RequiredArgsConstructor
+
 public class GeminiServices {
 
-    private final WebClient geminiWebClient;
+    private WebClient geminiWebClient;
+    private final String model;
 
-    // 1. Enviar prompt simples
-    public String enviarPrompt(String prompt) {
+    public GeminiServices(WebClient geminiWebClient,
+                          @Value("${excelencia.gem.model}") String model) {
+        this.geminiWebClient = geminiWebClient;
+        this.model = model;
+    }
+    // 1. Enviar prompt e retornar o Mono (fluxo reativo)
+    // ⚠️ ALTERADO: Mudança de String para Mono<String> e remoção do .block()
+    public Mono<String> enviarPrompt(String prompt) {
 
         return geminiWebClient.post()
-                .uri("/models/gemini-1.5-flash:generateContent")
-                .bodyValue(buildRequest(prompt))
+                .uri("/models/{model}:generateContent", model) // ⬅️ ALTERADO: Usando o modelo injetado
+                .bodyValue(buildGeminiRequest(prompt))
                 .retrieve()
-                .bodyToMono(String.class)
-                .block();
-    }
-
-    // Exemplo simples de corpo da requisição
-    private Object buildRequest(String prompt) {
-        return new Object() {
-            public final Object[] contents = {
-                    new Object() {
-                        public final Object[] parts = {
-                                new Object() {
-                                    public final String text = prompt;
-                                }
-                        };
+                .bodyToMono(GeminiResponse.class)
+                .map(response -> {
+                    // Extrai o texto real
+                    if (response.getCandidates() != null && !response.getCandidates().isEmpty()) {
+                        return response.getCandidates().get(0).getContent().getParts().get(0).getText();
                     }
-            };
-        };
+                    return "Resposta não encontrada ou erro na API.";
+                });
     }
 
-    public String avaliarResposta(RespostaDTO dto) {
+    // ⚠️ ALTERADO: Substituído o objeto anônimo por um método de construção limpo
+    private GeminiRequest buildGeminiRequest(String prompt) {
+        // 🗑️ Removemos a variável Map<String, Object> config
 
+        // Estrutura de conteúdo (sem alteração)
+        List<Content> contents = List.of(
+                new Content(List.of(new Part(prompt)))
+        );
+
+
+        return new GeminiRequest(contents);
+    }
+
+    // Métodos de avaliação e geração agora usam o novo enviarPrompt (Mono<String>)
+
+    public Mono<String> avaliarResposta(RespostaDTO dto) {
+        // ... (lógica de comando igual, mas retorno é Mono)
         String comando = """
                 Avalie a resposta do candidato.
                 
@@ -59,23 +78,19 @@ public class GeminiServices {
         return enviarPrompt(comando);
     }
 
-    public String gerarPergunta(ParametrosSimulacaoDTO dto) {
-
+    public Mono<String> gerarPergunta(ParametrosSimulacaoDTO dto) {
+        // ... (lógica de comando igual, mas retorno é Mono)
         String comando = """
     Gere a próxima pergunta da entrevista.
     """;
-
         return enviarPrompt(comando);
     }
 
-    public String gerarRelatorio(SessaoCompletaDTO dto) {
-
+    public Mono<String> gerarRelatorio(SessaoCompletaDTO dto) {
+        // ... (lógica de comando igual, mas retorno é Mono)
         String comando = """
     Gere o relatório final da entrevista.
     """;
-
         return enviarPrompt(comando);
     }
-
-
 }
